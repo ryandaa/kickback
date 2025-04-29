@@ -25,7 +25,12 @@ struct kickbackApp: App {
 
     var body: some Scene {
         WindowGroup {
-            ContentView()
+            VStack {
+                Text("kickback")
+                    .font(.largeTitle)
+                    .padding()
+                ContentView()
+            }
         }
         .modelContainer(sharedModelContainer)
     }
