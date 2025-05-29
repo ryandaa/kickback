@@ -15,7 +15,7 @@ struct MainTabView: View {
                     Label("Home", systemImage: "house") 
                 }
             
-            Text("Camera Coming Soon")
+            CameraView()
                 .tabItem { 
                     Label("Capture", systemImage: "camera") 
                 }

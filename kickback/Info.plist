@@ -12,5 +12,7 @@
     <string>1</string>
     <key>NSLocationWhenInUseUsageDescription</key>
     <string>We need your location to show your position on the map.</string>
+    <key>NSCameraUsageDescription</key>
+    <string>We need access to your camera to take photos.</string>
 </dict>
 </plist>
