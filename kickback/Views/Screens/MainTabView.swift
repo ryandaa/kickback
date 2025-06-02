@@ -13,9 +13,9 @@ struct MainTabView: View {
                     Label("Home", systemImage: "house")
                 }
             
-            CameraView()
+            FriendsListView()
                 .tabItem {
-                    Label("Capture", systemImage: "camera")
+                    Label("Friends", systemImage: "person.2")
                 }
             
             Text("Alerts Coming Soon")
