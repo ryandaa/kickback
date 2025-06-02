@@ -18,6 +18,9 @@ import SwiftData
 
 @main
 struct KickbackApp: App {
+    @StateObject private var authVM = AuthViewModel()
+    @State private var showSignUp = false
+
     var sharedModelContainer: ModelContainer = {
         let schema = Schema([
             Item.self,
@@ -33,7 +36,19 @@ struct KickbackApp: App {
     
     var body: some Scene {
         WindowGroup {
-            MainTabView()
+            if !authVM.isAuthenticated {
+                if showSignUp {
+                    SignUpScreen(viewModel: authVM) {
+                        showSignUp = false
+                    }
+                } else {
+                    SignInScreen(viewModel: authVM) {
+                        showSignUp = true
+                    }
+                }
+            } else {
+                MainTabView()
+            }
         }
         .modelContainer(sharedModelContainer)
     }

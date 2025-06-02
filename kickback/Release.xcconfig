@@ -1,0 +1,9 @@
+//
+//  Release.xcconfig
+//  kickback
+//
+//  Created by Ryan Da on 6/1/25.
+//
+
+SUPABASE_ANON_KEY = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRpcGN4ZHFjanN1bGdidWlienNsIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc0Njc0MjQyMSwiZXhwIjoyMDYyMzE4NDIxfQ.0dvgpCZ0hltZrvLr3OdPM3d0YXtOemknOr8OvJmYFyQ
+SUPABASE_URL = tipcxdqcjsulgbuibzsl.supabase.co
