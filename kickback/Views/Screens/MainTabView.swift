@@ -1,28 +1,26 @@
 import SwiftUI
 
 struct MainTabView: View {
-    @StateObject private var locationManager = LocationManager()
-    
     var body: some View {
         TabView {
-            MapScreen()
-                .tabItem { 
-                    Label("Map", systemImage: "map") 
+            KickbackLandingView()
+                .tabItem {
+                    Label("Create", systemImage: "plus.circle")
                 }
             
             Text("Feed Coming Soon")
-                .tabItem { 
-                    Label("Home", systemImage: "house") 
+                .tabItem {
+                    Label("Home", systemImage: "house")
                 }
             
             CameraView()
-                .tabItem { 
-                    Label("Capture", systemImage: "camera") 
+                .tabItem {
+                    Label("Capture", systemImage: "camera")
                 }
             
             Text("Alerts Coming Soon")
-                .tabItem { 
-                    Label("Alerts", systemImage: "bell") 
+                .tabItem {
+                    Label("Alerts", systemImage: "bell")
                 }
         }
     }
