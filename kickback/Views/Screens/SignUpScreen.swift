@@ -12,6 +12,17 @@ struct SignUpScreen: View {
                 Text("kickback")
                     .font(.largeTitle)
                     .bold()
+                TextField("full name", text: $viewModel.realName)
+                    .textContentType(.name)
+                    .autocapitalization(.words)
+                    .padding()
+                    .background(Color(.secondarySystemBackground))
+                    .cornerRadius(8)
+                TextField("username", text: $viewModel.username)
+                    .autocapitalization(.none)
+                    .padding()
+                    .background(Color(.secondarySystemBackground))
+                    .cornerRadius(8)
                 TextField("email", text: $viewModel.email)
                     .textContentType(.emailAddress)
                     .autocapitalization(.none)
@@ -46,6 +57,12 @@ struct SignUpScreen: View {
                 Button("already have an account? come back and sign in.") {
                     onSignInTap()
                 }
+                .padding(.top, 8)
+                Button("skip sign in (dev only)") {
+                    viewModel.isAuthenticated = true
+                }
+                .font(.subheadline)
+                .foregroundColor(.gray)
                 .padding(.top, 8)
             }
             .padding()

@@ -5,6 +5,8 @@ import Combine
 class AuthViewModel: ObservableObject {
     @Published var email: String = ""
     @Published var password: String = ""
+    @Published var realName: String = ""
+    @Published var username: String = ""
     @Published var isLoading: Bool = false
     @Published var errorMessage: String?
     @Published var isAuthenticated: Bool = false
@@ -15,6 +17,7 @@ class AuthViewModel: ObservableObject {
         isLoading = true
         errorMessage = nil
         do {
+            print("Signing up with name: \(realName), username: \(username)")
             try await authService.signUp(email: email, password: password)
             self.isAuthenticated = self.authService.isAuthenticated
             self.isLoading = false

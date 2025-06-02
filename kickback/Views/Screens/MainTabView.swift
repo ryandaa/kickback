@@ -22,6 +22,11 @@ struct MainTabView: View {
                 .tabItem {
                     Label("Alerts", systemImage: "bell")
                 }
+            
+            ProfileFeedView()
+                .tabItem {
+                    Label("Profile", systemImage: "person.crop.circle.fill")
+                }
         }
     }
 }
