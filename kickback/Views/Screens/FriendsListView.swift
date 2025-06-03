@@ -1,19 +1,28 @@
 import SwiftUI
 
 struct FriendsListView: View {
+    // NEW: connect to live data
+    @StateObject private var vm = FriendViewModel()
+
     @State private var searchText = ""
     @State private var showAddFriend = false
     @State private var selectedRequestTab: RequestTab = .incoming
-    @State private var pendingRequests: [FriendRequest] = [] // mock for now
-    @State private var friends: [Friend] = [] // mock for now
-    
-    var filteredFriends: [Friend] {
-        if searchText.isEmpty { return friends }
-        return friends.filter { $0.name.lowercased().contains(searchText.lowercased()) }
+
+    // Text‑field for adding by UUID
+    @State private var manualId = ""
+
+    // MARK: – Computed lists
+    private var filteredFriends: [FriendProfile] {
+        if searchText.isEmpty { return vm.friends }
+        return vm.friends.filter {
+            ($0.full_name ?? $0.username)
+                .lowercased()
+                .contains(searchText.lowercased())
+        }
     }
-    
-    var filteredRequests: [FriendRequest] {
-        pendingRequests.filter { $0.type == selectedRequestTab }
+
+    private var currentRequests: [FriendRequest] {
+        selectedRequestTab == .incoming ? vm.incoming : vm.outgoing
     }
     
     var body: some View {
@@ -72,32 +81,59 @@ struct FriendsListView: View {
                 // Pending Requests List
                 ScrollView(.horizontal, showsIndicators: false) {
                     HStack(spacing: 16) {
-                        ForEach(filteredRequests) { req in
-                            FriendRequestRow(request: req)
+                        ForEach(currentRequests) { req in
+                            FriendRequestRow(
+                                request: req,
+                                isIncoming: req.to_user_id == vm.friends.first?.id, // simple check
+                                acceptAction: { Task { await vm.respond(id: req.id, accept: true) } },
+                                declineAction:{ Task { await vm.respond(id: req.id, accept: false) } }
+                            )
                         }
                     }
                     .padding(.horizontal)
                 }
+
                 // Friends List
                 Text("Friends")
                     .font(.headline)
                     .padding([.top, .horizontal])
+
                 List {
                     ForEach(filteredFriends) { friend in
-                        FriendRow(friend: friend)
+                        FriendRow(profile: friend)
                     }
                 }
-                .listStyle(PlainListStyle())
+                .listStyle(.plain)
             }
             .navigationBarTitle("Friends", displayMode: .inline)
             .sheet(isPresented: $showAddFriend) {
-                // Placeholder for add friend flow
-                VStack {
-                    Text("Add Friend Feature Coming Soon")
+                VStack(spacing: 20) {
+                    Text("Add friend by UUID")
                         .font(.headline)
-                    Button("Close") { showAddFriend = false }
+                    TextField("00000000‑0000‑0000‑0000‑000000000000",
+                              text: $manualId)
+                        .textInputAutocapitalization(.never)
+                        .autocorrectionDisabled()
                         .padding()
+                        .background(Color(hex: "#E3E7DF"))
+                        .cornerRadius(8)
+                        .padding(.horizontal)
+                    Button("Send") {
+                        if let id = UUID(uuidString: manualId) {
+                            Task { await vm.addFriend(id: id) }
+                            showAddFriend = false
+                        }
+                    }
+                    .buttonStyle(.borderedProminent)
+                    Button("Close") { showAddFriend = false }
                 }
+                .padding()
+            }
+            .task { await vm.refresh() }          // load data
+            .alert("Error", isPresented: .constant(vm.errorMessage != nil)) {
+                Button("OK") { vm.errorMessage = nil }
+            } message: {
+                Text(vm.errorMessage ?? "")
             }
         }
     }
@@ -110,40 +146,28 @@ enum RequestTab: String, CaseIterable {
     case outgoing = "Outgoing"
 }
 
-struct FriendRequest: Identifiable {
-    let id = UUID()
-    let name: String
-    let type: RequestTab
-    // let avatarURL: URL? // for future
-}
-
 struct FriendRow: View {
-    let friend: Friend
+    let profile: FriendProfile
     var body: some View {
         HStack(spacing: 16) {
             Circle()
                 .fill(Color(hex: "#E3E7DF"))
                 .frame(width: 48, height: 48)
                 .overlay(
-                    Image(systemName: friend.avatar)
+                    // Placeholder avatar
+                    Image(systemName: "person.crop.circle")
                         .resizable()
                         .scaledToFit()
                         .frame(width: 40, height: 40)
                         .foregroundColor(.gray)
                 )
             VStack(alignment: .leading, spacing: 2) {
-                Text(friend.name)
-                    .font(.subheadline)
-                    .fontWeight(.medium)
-                Text("@username") // Placeholder until real usernames are available
-                    .font(.caption)
-                    .foregroundColor(Color(hex: "#7B8C6A"))
+                Text(profile.full_name ?? profile.username)
+                    .font(.subheadline).fontWeight(.medium)
+                Text("@\(profile.username)")
+                    .font(.caption).foregroundColor(Color(hex: "#7B8C6A"))
             }
             Spacer()
-            Button(action: {}) {
-                Image(systemName: "plus")
-                    .foregroundColor(Color(hex: "#7B8C6A"))
-            }
         }
         .padding(.vertical, 4)
     }
@@ -151,6 +175,18 @@ struct FriendRow: View {
 
 struct FriendRequestRow: View {
     let request: FriendRequest
+    let isIncoming: Bool
+    let acceptAction: () -> Void
+    let declineAction: () -> Void
+
+    private var displayName: String {
+        if isIncoming {
+            request.from_profile?.full_name ?? request.from_profile?.username ?? "Unknown"
+        } else {
+            request.to_profile?.full_name ?? request.to_profile?.username ?? "Unknown"
+        }
+    }
+
     var body: some View {
         HStack(spacing: 12) {
             Circle()
@@ -158,19 +194,22 @@ struct FriendRequestRow: View {
                 .frame(width: 40, height: 40)
                 .overlay(
                     Image(systemName: "person.crop.circle")
-                        .resizable()
-                        .scaledToFit()
+                        .resizable().scaledToFit()
                         .frame(width: 32, height: 32)
                         .foregroundColor(.gray)
                 )
-            Text(request.name)
-                .font(.subheadline)
-                .lineLimit(1)
-            if request.type == .incoming {
-                Image(systemName: "checkmark")
-                    .foregroundColor(Color(hex: "#7B8C6A"))
-            } else {
-                Image(systemName: "xmark")
+            Text(displayName)
+                .font(.subheadline).lineLimit(1)
+
+            if isIncoming {
+                Button(action: acceptAction) {
+                    Image(systemName: "checkmark")
+                        .foregroundColor(Color(hex: "#7B8C6A"))
+                }
+            }
+
+            Button(action: declineAction) {
+                Image(systemName: isIncoming ? "xmark" : "trash")
                     .foregroundColor(.gray)
             }
         }
@@ -178,8 +217,4 @@ struct FriendRequestRow: View {
         .background(Color(hex: "#F5F7F2"))
         .cornerRadius(12)
     }
-}
-
-#Preview {
-    FriendsListView()
 }

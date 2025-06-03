@@ -1,42 +1,17 @@
-//
-//  KickbackApp.swift
-//  kickback
-//
-//  Created by Ryan Da on 5/28/25.
-//
-
-
-//
-//  kickbackApp.swift
-//  kickback
-//
-//  Created by Ryan Da on 4/28/25.
-//
-
 import SwiftUI
-import SwiftData
 
 @main
 struct KickbackApp: App {
     @StateObject private var authVM = AuthViewModel()
-    @State private var showSignUp = false
+    @State private var showSignUp  = false          // toggles between the two screens
 
-    var sharedModelContainer: ModelContainer = {
-        let schema = Schema([
-            Item.self,
-        ])
-        let modelConfiguration = ModelConfiguration(schema: schema, isStoredInMemoryOnly: false)
-        
-        do {
-            return try ModelContainer(for: schema, configurations: [modelConfiguration])
-        } catch {
-            fatalError("Could not create ModelContainer: \(error)")
-        }
-    }()
-    
     var body: some Scene {
         WindowGroup {
-            if !authVM.isAuthenticated {
+            if authVM.isAuthenticated {
+                MainTabView()
+                    .environmentObject(authVM)
+            } else {
+                // A simple gate that switches between Sign‑In and Sign‑Up
                 if showSignUp {
                     SignUpScreen(viewModel: authVM) {
                         showSignUp = false
@@ -46,11 +21,7 @@ struct KickbackApp: App {
                         showSignUp = true
                     }
                 }
-            } else {
-                MainTabView()
             }
         }
-        .modelContainer(sharedModelContainer)
     }
 }
-

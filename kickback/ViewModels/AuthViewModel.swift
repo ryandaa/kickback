@@ -1,55 +1,55 @@
 import Foundation
-import Combine
+import SwiftUI                     // ← gives ObservableObject
+import Supabase
 
 @MainActor
-class AuthViewModel: ObservableObject {
-    @Published var email: String = ""
-    @Published var password: String = ""
-    @Published var realName: String = ""
-    @Published var username: String = ""
-    @Published var isLoading: Bool = false
+final class AuthViewModel: ObservableObject {
+
+    // ─────────────── Form fields bound to your TextFields
+    @Published var realName   = ""
+    @Published var username   = ""
+    @Published var email      = ""
+    @Published var password   = ""
+
+    // ─────────────── UI state
+    @Published var isLoading       = false
     @Published var errorMessage: String?
-    @Published var isAuthenticated: Bool = false
+    @Published var isAuthenticated = false    // used by the app entry point
 
-    private let authService = AuthService.shared
+    private let service = AuthService()
 
+    // MARK: –  Public actions consumed by the views
     func signUp() async {
         isLoading = true
-        errorMessage = nil
+        defer { isLoading = false }
+
         do {
-            print("Signing up with name: \(realName), username: \(username)")
-            try await authService.signUp(email: email, password: password)
-            self.isAuthenticated = self.authService.isAuthenticated
-            self.isLoading = false
+            try await service.signUp(email: email,
+                                     password: password,
+                                     username: username,
+                                     fullName: realName)
+            isAuthenticated = true
         } catch {
-            self.errorMessage = error.localizedDescription
-            self.isLoading = false
+            errorMessage = error.localizedDescription
         }
     }
 
     func signIn() async {
         isLoading = true
-        errorMessage = nil
+        defer { isLoading = false }
+
         do {
-            try await authService.signIn(email: email, password: password)
-            self.isAuthenticated = self.authService.isAuthenticated
-            self.isLoading = false
+            try await service.signIn(email: email, password: password)
+            isAuthenticated = true
         } catch {
-            self.errorMessage = error.localizedDescription
-            self.isLoading = false
+            errorMessage = error.localizedDescription
         }
     }
 
     func signOut() async {
-        isLoading = true
-        errorMessage = nil
-        do {
-            try await authService.signOut()
-            self.isAuthenticated = self.authService.isAuthenticated
-            self.isLoading = false
-        } catch {
-            self.errorMessage = error.localizedDescription
-            self.isLoading = false
-        }
+        try? await service.signOut()
+        isAuthenticated = false
+        // Optional: clear the form
+        realName = ""; username = ""; email = ""; password = ""
     }
-} 
+}

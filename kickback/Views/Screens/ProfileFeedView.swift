@@ -1,6 +1,7 @@
 import SwiftUI
 
 struct ProfileFeedView: View {
+    @EnvironmentObject private var authVM: AuthViewModel
     @State private var profileImage: Image = Image(systemName: "person.crop.circle")
     @State private var showingImagePicker = false
     @State private var name: String = "filler_name"
@@ -59,8 +60,15 @@ struct ProfileFeedView: View {
             }
             .background(Color(hex: "#F5F7F2").ignoresSafeArea())
             .navigationBarTitle("Profile", displayMode: .inline)
+            /* 🔑 Toolbar with Sign‑Out */
+            .toolbar {
+                ToolbarItem(placement: .navigationBarTrailing) {
+                    Button("Sign Out") {
+                        Task { await authVM.signOut() }
+                    }
+                }
+            }
             .sheet(isPresented: $showingImagePicker) {
-                // Placeholder for image picker
                 VStack {
                     Text("Image picker coming soon")
                     Button("Close") { showingImagePicker = false }
@@ -70,6 +78,3 @@ struct ProfileFeedView: View {
     }
 }
 
-#Preview {
-    ProfileFeedView()
-} 
