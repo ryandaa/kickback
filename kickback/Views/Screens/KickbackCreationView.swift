@@ -120,12 +120,6 @@ struct KickbackCreationView: View {
                 .padding()
             }
             .navigationBarTitle("New Kickback", displayMode: .inline)
-            .navigationBarItems(leading: Button(action: {
-                dismiss()
-            }) {
-                Image(systemName: "chevron.left")
-                    .foregroundColor(.black)
-            })
             .fullScreenCover(isPresented: $showCamera) {
                 CameraCaptureView(capturedImages: $capturedImages)
             }

@@ -3,12 +3,7 @@ import SwiftUI
 struct MainTabView: View {
     var body: some View {
         TabView {
-            KickbackLandingView()
-                .tabItem {
-                    Label("Create", systemImage: "plus.circle")
-                }
-            
-            Text("Feed Coming Soon")
+            FeedScreen()
                 .tabItem {
                     Label("Home", systemImage: "house")
                 }
@@ -16,6 +11,11 @@ struct MainTabView: View {
             FriendsListView()
                 .tabItem {
                     Label("Friends", systemImage: "person.2")
+                }
+            
+            KickbackCreationView()
+                .tabItem {
+                    Label("Create", systemImage: "plus.circle")
                 }
             
             Text("Alerts Coming Soon")
