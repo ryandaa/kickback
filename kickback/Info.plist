@@ -2,21 +2,9 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
-    <key>CFBundleName</key>
-    <string>kickback</string>
-    <key>CFBundleIdentifier</key>
-    <string>kb.kickback</string>
-    <key>CFBundleShortVersionString</key>
-    <string>1.0</string>
-    <key>CFBundleVersion</key>
-    <string>1</string>
-    <key>NSLocationWhenInUseUsageDescription</key>
-    <string>We need your location to show your position on the map.</string>
-    <key>NSCameraUsageDescription</key>
-    <string>We need access to your camera to take photos.</string>
-    <key>SUPABASE_URL</key>
-    <string>$(SUPABASE_URL)</string>
-    <key>SUPABASE_ANON_KEY</key>
-    <string>$(SUPABASE_ANON_KEY)</string>
+	<key>SUPABASE_ANON_KEY</key>
+	<string>$(SUPABASE_ANON_KEY)</string>
+	<key>SUPABASE_URL</key>
+	<string>$(SUPABASE_URL)</string>
 </dict>
 </plist>

@@ -1,6 +1,11 @@
 import Foundation
 import Supabase
 
+struct FriendEdge: Decodable {
+    let from_user_id: UUID
+    let to_user_id:   UUID
+}
+
 // MARK: Decodable models coming from PostgREST
 struct FriendProfile: Decodable, Identifiable {
     let id: UUID
@@ -70,17 +75,22 @@ struct FriendService {
 
     // accepted friends
     func fetchFriends() async throws -> [FriendProfile] {
-        let rels: [FriendRequest] = try await client
+
+        // 2️⃣  decode into FriendEdge, not FriendRequest
+        let edges: [FriendEdge] = try await client
             .from("friend_requests")
-            .select("from_user_id,to_user_id")
+            .select("from_user_id,to_user_id")          // ← columns match struct
             .eq("status", value: "accepted")
             .or("from_user_id.eq.\(uid),to_user_id.eq.\(uid)")
             .execute()
             .value
 
-        let ids = Set(rels.map { $0.from_user_id == uid ? $0.to_user_id : $0.from_user_id })
+        // collect the other party’s IDs
+        let ids = Set(edges.map { $0.from_user_id == uid ? $0.to_user_id
+                                                        : $0.from_user_id })
         guard !ids.isEmpty else { return [] }
 
+        // fetch full profiles
         return try await client
             .from("profiles")
             .select("*")

@@ -148,19 +148,25 @@ enum RequestTab: String, CaseIterable {
 
 struct FriendRow: View {
     let profile: FriendProfile
+
     var body: some View {
         HStack(spacing: 16) {
-            Circle()
-                .fill(Color(hex: "#E3E7DF"))
-                .frame(width: 48, height: 48)
-                .overlay(
-                    // Placeholder avatar
-                    Image(systemName: "person.crop.circle")
-                        .resizable()
-                        .scaledToFit()
-                        .frame(width: 40, height: 40)
-                        .foregroundColor(.gray)
-                )
+
+            // ── Avatar ----------------------------------------------------
+            AsyncImage(url: URL(string: profile.avatar_url ?? "")) { phase in
+                switch phase {
+                case .success(let img):
+                    img.resizable().scaledToFill()
+                default:
+                    Image(systemName: "person.crop.circle.fill")
+                        .resizable().scaledToFit()
+                        .foregroundColor(.gray.opacity(0.5))
+                }
+            }
+            .frame(width: 48, height: 48)
+            .clipShape(Circle())
+
+            // ── Name ------------------------------------------------------
             VStack(alignment: .leading, spacing: 2) {
                 Text(profile.full_name ?? profile.username)
                     .font(.subheadline).fontWeight(.medium)
@@ -172,6 +178,7 @@ struct FriendRow: View {
         .padding(.vertical, 4)
     }
 }
+
 
 struct FriendRequestRow: View {
     let request: FriendRequest
